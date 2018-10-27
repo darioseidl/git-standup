@@ -36,7 +36,7 @@ function colored() {
   BOLD=$(tput bold)
   UNDERLINE=$(tput smul)
   NORMAL=$(tput sgr0)
-  GIT_PRETTY_FORMAT='%Cred%h%Creset - %s %Cgreen(%cd) %C(bold blue)<%an>%Creset'
+  GIT_PRETTY_FORMAT='%Cgreen%cd %Cred%h%Creset %C(bold blue)%<(16)%an%Creset %s'
   COLOR=always
 
   if [[ $option_g ]] ; then
@@ -53,7 +53,7 @@ function uncolored() {
   BOLD=""
   UNDERLINE=""
   NORMAL=""
-  GIT_PRETTY_FORMAT='%h - %s (%cd) <%an>'
+  GIT_PRETTY_FORMAT='%cd %h %<(16)%an %s'
   COLOR=never
 
   if [[ $option_g ]] ; then
@@ -187,7 +187,7 @@ else
   WEEKSTART=${WEEKSTART:="Mon"}
 
   WEEKEND="$( cut -d '-' -f 2 <<< "$option_w" )";
-  WEEKEND=${WEEKEND:="Fri"}
+  WEEKEND=${WEEKEND:="Sun"}
 
   ## In case it is the start of week, we need to
   ## show the commits since the last weekend
@@ -208,7 +208,7 @@ if [[ $option_A ]]; then
   AFTER_OPT="--after=\"$option_A\""
 fi
 
-GIT_DATE_FORMAT=${option_D:-relative}
+GIT_DATE_FORMAT=${option_D:-format:'%Y-%m-%d %H:%M'}
 
 GIT_LOG_COMMAND="git --no-pager log \
     --all
