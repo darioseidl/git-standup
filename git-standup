@@ -11,7 +11,7 @@ Usage:
   -L      - Toggle inclusion of symbolic links in recursive directory search
   -d      - Specify the number of days back to include
   -u      - Specify the number of days back until this day
-  -D      - Specify the date format for "git log"
+  -D      - Specify the date format for "git log" (default: relative, other: local|default|iso|rfc|short|raw)
   -h      - Display this help screen
   -g      - Show if commit is GPG signed (G) or not (N)
   -f      - Fetch the latest commits beforehand
@@ -20,6 +20,7 @@ Usage:
   -c      - Show diffstat for every matched commit
   -A      - List commits after this date
   -B      - List commits before this date
+  -R      - Display the author date instead of the committer date
 
 Examples:
   git standup -a "John Doe" -w "MON-FRI" -m 3
@@ -96,17 +97,17 @@ function runStandup() {
     elif [[ -z $option_s ]] ; then  ## Show the no activity message only if the `s` flag is not there
       echo "${BOLD}${UNDERLINE}${YELLOW}$CUR_DIR${NORMAL}"
       if [[ ${AUTHOR} = '.*' ]] ; then
-        echo "${YELLOW}Seems like no one did anything!${NORMAL}"
+        echo "${YELLOW}No commits found during this period.${NORMAL}"
       else
-        echo "${YELLOW}Seems like $AUTHOR did nothing!${NORMAL}"
+        echo "${YELLOW}No commits from $AUTHOR during this period.${NORMAL}"
       fi
     fi
   fi
 }
 
-while getopts "hgfsd:u:a:w:m:D:A:B:Lrc" opt; do
+while getopts "hgfsd:u:a:w:m:D:A:B:LrcR" opt; do
   case $opt in
-    h|d|u|a|w|m|g|D|f|s|L|r|A|B|c)
+    h|d|u|a|w|m|g|D|f|s|L|r|A|B|c|R)
       declare "option_$opt=${OPTARG:-0}"
       ;;
     \?)
@@ -143,7 +144,6 @@ else
 fi
 
 ## Set the necessary variables for standup
-AUTHOR=`git config user.name`
 SINCE="yesterday"
 MAXDEPTH=2
 INCLUDE_LINKS=
@@ -154,15 +154,6 @@ STAT=
 # If report is to be generated, remove the existing report file if any
 if [[ ! -z $option_r ]] ; then
    rm -rf ${REPORT_FILE_PATH}
-fi
-
-if [[ $option_a ]] ; then
-  # In case the parameter
-  if [[ $option_a = 'all' ]] ; then
-    AUTHOR=".*"
-  else
-    AUTHOR="$option_a"
-  fi
 fi
 
 if [[ $option_m ]] ; then
@@ -196,20 +187,6 @@ if [[ $option_A ]]; then
 fi
 
 GIT_DATE_FORMAT=${option_D:-format:'%Y-%m-%d %H:%M'}
-
-GIT_LOG_COMMAND="git --no-pager log \
-    --all
-    --no-merges
-    --since=\"$SINCE\"
-    ${UNTIL_OPT}
-    ${AFTER_OPT}
-    --author=\"$AUTHOR\"
-    --abbrev-commit
-    --oneline
-    --pretty=format:'$GIT_PRETTY_FORMAT'
-    --date='$GIT_DATE_FORMAT'
-    --color=$COLOR
-    ${STAT}"
 
 # For when the command has been run in a non-repo directory
 if [[ ! -d ".git" || -f ".git" ]]; then
@@ -255,6 +232,31 @@ for DIR in ${PROJECT_DIRS}; do
     cd ${BASE_DIR}
     continue
   fi
+
+  AUTHOR=`git config user.name`
+
+  if [[ $option_a ]] ; then
+    # In case the parameter
+    if [[ $option_a = 'all' ]] ; then
+      AUTHOR=".*"
+    else
+      AUTHOR="$option_a"
+    fi
+  fi
+
+  GIT_LOG_COMMAND="git --no-pager log \
+    --all
+    --no-merges
+    --since=\"$SINCE\"
+    ${UNTIL_OPT}
+    ${AFTER_OPT}
+    --author=\"$AUTHOR\"
+    --abbrev-commit
+    --oneline
+    --pretty=format:'$GIT_PRETTY_FORMAT'
+    --date='$GIT_DATE_FORMAT'
+    --color=$COLOR
+    ${STAT}"
 
   runStandup
 
