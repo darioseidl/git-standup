@@ -36,7 +36,7 @@ function colored() {
   BOLD=$(tput bold)
   UNDERLINE=$(tput smul)
   NORMAL=$(tput sgr0)
-  GIT_PRETTY_FORMAT='%Cgreen%cd %Cred%h%Creset %C(bold blue)%<(16)%an%Creset %s'
+  GIT_PRETTY_FORMAT='%Cgreen%ad %Cred%h%Creset %C(bold blue)%<(16)%an%Creset %s'
   COLOR=always
 
   if [[ $option_g ]] ; then
@@ -53,7 +53,7 @@ function uncolored() {
   BOLD=""
   UNDERLINE=""
   NORMAL=""
-  GIT_PRETTY_FORMAT='%cd %h %<(16)%an %s'
+  GIT_PRETTY_FORMAT='%ad %h %<(16)%an %s'
   COLOR=never
 
   if [[ $option_g ]] ; then
